@@ -7,9 +7,13 @@ public enum EstadoPedido {
     EXPIRADO;
 
 
+    public boolean transicionValida(EstadoPedido destino) {
+        return switch (this) {
+            case CREADO -> destino == CONFIRMADO || destino == CANCELADO || destino == EXPIRADO;
+            case CONFIRMADO -> destino == CANCELADO;
+            case CANCELADO, EXPIRADO -> false;
+        };
 
-    public boolean transicionValida(EstadoPedido destino){
-        return true;
     }
 
 }
