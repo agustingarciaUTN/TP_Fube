@@ -14,5 +14,11 @@ public class EstadoPedidoTest {
         assertThat(EstadoPedido.CREADO.transicionValida(EstadoPedido.CONFIRMADO)).isTrue();
     }
 
+    @Test
+    //Desde cancelado no debe pasar a confirmado
+     public void canceladoNoHaciaConfirmado(){
+        assertThat(EstadoPedido.CANCELADO.transicionValida(EstadoPedido.CONFIRMADO)).isFalse();
+    }
+
 
 }
