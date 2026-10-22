@@ -7,4 +7,5 @@ import java.util.UUID;
 public interface ServicioInventario {
     public ProductoDTO consultarStock(UUID id);
     public ProductoDTO reducirStock(UUID id, int cantidad);
+    public ProductoDTO aumentarStock(UUID id, int cantidad);
 }

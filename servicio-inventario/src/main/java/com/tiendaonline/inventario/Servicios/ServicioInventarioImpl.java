@@ -38,4 +38,15 @@ public class ServicioInventarioImpl implements ServicioInventario{
         }
         return ProductoDTO.ProductoToDTO(prod);
     }
+
+    @Override
+    public ProductoDTO aumentarStock(UUID id, int cantidad){
+        Producto prod = repositorioProductos.findById(id).orElseThrow(
+                () -> new ProductoNoEncontradoException("El id introducido no corresponde a ningún producto")
+        );
+        int stockActual = prod.getCantidadDisponible();
+        prod.setCantidadDisponible(stockActual+cantidad);
+        repositorioProductos.save(prod); //Se guarda el producto con el nuevo stock
+        return ProductoDTO.ProductoToDTO(prod);
+    }
 }

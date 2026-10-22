@@ -13,10 +13,15 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ControladorReservas {
     public final ServicioReservaImpl servReserva;
-//No funciona
+
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
     public ReservaDTO reservarProducto(@RequestBody ReservaDTO reserva){
         return servReserva.reservarProducto(reserva);
+    }
+    @PatchMapping("/{reservaId}/liberacion")
+    @ResponseStatus(HttpStatus.OK)
+    public ReservaDTO liberarReserva(@PathVariable UUID reservaId){
+        return servReserva.liberarReserva(reservaId);
     }
 }
