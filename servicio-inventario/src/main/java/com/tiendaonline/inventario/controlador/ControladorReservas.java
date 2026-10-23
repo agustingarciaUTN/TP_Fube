@@ -15,12 +15,12 @@ public class ControladorReservas {
     public final ServicioReservaImpl servReserva;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.CREATED)//Por defecto se retorna 201, si hay excepcion se trata en el RestExceptionHandler
     public ReservaDTO reservarProducto(@RequestBody ReservaDTO reserva){
         return servReserva.reservarProducto(reserva);
     }
     @PatchMapping("/{reservaId}/liberacion")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.OK)//Por defecto se retorna 200 OK, si hay excepcion se trata en el RestExceptionHandler
     public ReservaDTO liberarReserva(@PathVariable UUID reservaId){
         return servReserva.liberarReserva(reservaId);
     }

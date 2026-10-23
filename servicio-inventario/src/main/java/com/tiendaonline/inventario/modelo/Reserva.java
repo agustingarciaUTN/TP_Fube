@@ -1,16 +1,14 @@
 package com.tiendaonline.inventario.modelo;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -18,7 +16,7 @@ import java.util.UUID;
 @Table(name="reservas")
 public class Reserva {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     @Column(name="producto_id")
     private UUID productoId;

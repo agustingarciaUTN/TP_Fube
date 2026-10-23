@@ -16,13 +16,7 @@ import java.util.UUID;
 public class ProductoDTO {
     private UUID id;
     private String nombre;
+    private String sku;
     private int cantidadDisponible;
 
-    public static ProductoDTO ProductoToDTO(Producto prod){
-        return ProductoDTO.builder()
-                .id(prod.getId())
-                .nombre(prod.getNombre())
-                .cantidadDisponible(prod.getCantidadDisponible())
-                .build();
-    }
 }

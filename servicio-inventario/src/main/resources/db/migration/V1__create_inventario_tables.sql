@@ -5,7 +5,6 @@ CREATE TABLE productos (
     cantidad_disponible  INTEGER NOT NULL DEFAULT 0 CHECK (cantidad_disponible >= 0)
 );
 
-
 CREATE TABLE reservas (
     id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     producto_id      UUID NOT NULL REFERENCES productos(id),

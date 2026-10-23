@@ -15,8 +15,8 @@ public class ControladorProductos {
     private final ServicioInventarioImpl servicioInventario;
 
     @GetMapping("/{id}/stock")
-    @ResponseStatus(HttpStatus.OK)
-    public ProductoDTO consultarStockProducto(@PathVariable UUID id){
+    @ResponseStatus(HttpStatus.OK) //Por defecto se retorna 200 OK, si hay excepcion se trata en el RestExceptionHandler
+    public int consultarStockProducto(@PathVariable UUID id){
         return servicioInventario.consultarStock(id);
     }
 }

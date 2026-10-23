@@ -19,25 +19,4 @@ public class ReservaDTO {
     private int cantidad;
     private String estado;
     private LocalDateTime fechaCreacion;
-
-    public static ReservaDTO ReservaToDTO(Reserva reserva){
-        return ReservaDTO.builder()
-                .id(reserva.getId())
-                .productoId(reserva.getProductoId())
-                .pedidoId(reserva.getPedidoId())
-                .cantidad(reserva.getCantidad())
-                .estado(reserva.getEstado())
-                .fechaCreacion(reserva.getFechaCreacion())
-                .build();
-    }
-    public static Reserva DTOToReserva(ReservaDTO reserva){
-        return Reserva.builder()
-                .id(reserva.getId())
-                .productoId(reserva.getProductoId())
-                .pedidoId(reserva.getPedidoId())
-                .cantidad(reserva.getCantidad())
-                .estado(reserva.getEstado())
-                .fechaCreacion(reserva.getFechaCreacion())
-                .build();
-    }
 }
