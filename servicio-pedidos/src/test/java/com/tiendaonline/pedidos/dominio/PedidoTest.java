@@ -16,7 +16,7 @@ public class PedidoTest {
 
     @Test
     public void pedidoNuevoNaceCreadoConCliente(){
-        ItemPedido item = new ItemPedido(2, BigDecimal.valueOf(100));
+        ItemPedido item = new ItemPedido(2, BigDecimal.valueOf(100),  UUID.randomUUID(), UUID.randomUUID());
         Pedido pedido = new Pedido(idCliente, List.of(item));
 
         assertThat(pedido.getEstado()).isEqualTo(EstadoPedido.CREADO);
@@ -25,19 +25,19 @@ public class PedidoTest {
 
     @Test
     public void pedidoSinCliente(){
-        ItemPedido item = new ItemPedido(2, BigDecimal.valueOf(100));
-        assertThatThrownBy(() -> new Pedido(null, List.of(item)) )
+        ItemPedido item = new ItemPedido(2, BigDecimal.valueOf(100),  UUID.randomUUID(), UUID.randomUUID());
+        assertThatThrownBy(() -> new Pedido(null, List.of(item)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Un pedido debe tener asignado un cliente");
     }
 
     @Test
     public void deberiaSumarSubtotales(){
-        ItemPedido item1 = new ItemPedido(1, BigDecimal.valueOf(100));
-        ItemPedido item2 = new ItemPedido(2, BigDecimal.valueOf(200));
+        ItemPedido item1 = new ItemPedido(1, BigDecimal.valueOf(100),  UUID.randomUUID(), UUID.randomUUID());
+        ItemPedido item2 = new ItemPedido(2, BigDecimal.valueOf(200),   UUID.randomUUID(), UUID.randomUUID());
 
         Pedido pedido = new Pedido(idCliente, List.of(item1, item2));
-        BigDecimal sumaTotal = pedido.montoTotal();
+        BigDecimal sumaTotal = pedido.getMontoTotal();
 
         assertThat(sumaTotal).isEqualByComparingTo(BigDecimal.valueOf(500));
     }
@@ -62,8 +62,8 @@ public class PedidoTest {
 
     @Test
     public void cambiarEstadoValido(){
-        ItemPedido item = new ItemPedido(2, BigDecimal.valueOf(100));
-        ItemPedido item2 = new ItemPedido(2, BigDecimal.valueOf(200));
+        ItemPedido item = new ItemPedido(2, BigDecimal.valueOf(100), UUID.randomUUID(), UUID.randomUUID());
+        ItemPedido item2 = new ItemPedido(2, BigDecimal.valueOf(200), UUID.randomUUID(),  UUID.randomUUID());
 
         Pedido pedido = new Pedido(idCliente, List.of(item, item2));
 
@@ -73,8 +73,8 @@ public class PedidoTest {
 
     @Test
     public void cambiarEstadoInvalido(){
-        ItemPedido item = new ItemPedido(2, BigDecimal.valueOf(100));
-        ItemPedido item2 = new ItemPedido(2, BigDecimal.valueOf(200));
+        ItemPedido item = new ItemPedido(2, BigDecimal.valueOf(100),  UUID.randomUUID(), UUID.randomUUID());
+        ItemPedido item2 = new ItemPedido(2, BigDecimal.valueOf(200),   UUID.randomUUID(), UUID.randomUUID());
 
         Pedido pedido = new Pedido(idCliente, List.of(item, item2));
         pedido.cambiarEstado(EstadoPedido.CANCELADO);
@@ -88,7 +88,7 @@ public class PedidoTest {
 
     @Test
     public void pedidoNuevoConFechaCreacion(){
-        ItemPedido item = new ItemPedido(2, BigDecimal.valueOf(100));
+        ItemPedido item = new ItemPedido(2, BigDecimal.valueOf(100),  UUID.randomUUID(), UUID.randomUUID());
 
         LocalDateTime antesDeCrear = LocalDateTime.now();
         Pedido pedido = new Pedido(idCliente, List.of(item));
@@ -99,7 +99,7 @@ public class PedidoTest {
 
     @Test
     public void cambiarEstadoActualizaFechaActualizacion(){
-        ItemPedido item = new ItemPedido(2, BigDecimal.valueOf(100));
+        ItemPedido item = new ItemPedido(2, BigDecimal.valueOf(100), UUID.randomUUID(), UUID.randomUUID());
         Pedido pedido = new Pedido(idCliente, List.of(item));
         LocalDateTime fechaActualizacion = pedido.getFechaActualizacion();
 
@@ -108,5 +108,24 @@ public class PedidoTest {
 
         assertThat(pedido.getFechaActualizacion()).isNotNull();
         assertThat(pedido.getFechaActualizacion()).isAfterOrEqualTo(fechaActualizacion);
+    }
+
+    @Test
+    public void pedidoNuevoDebeTenerId(){
+        ItemPedido item = new ItemPedido(2, BigDecimal.valueOf(100),  UUID.randomUUID(), UUID.randomUUID());
+        Pedido pedido = new Pedido(idCliente, List.of(item));
+
+        assertThat(pedido.getId()).isNotNull();
+    }
+
+    @Test
+    public void distintosPedidosDebenTenerDistintosId(){
+        ItemPedido item = new ItemPedido(2, BigDecimal.valueOf(100),  UUID.randomUUID(), UUID.randomUUID());
+        Pedido pedido = new Pedido(idCliente, List.of(item));
+
+        ItemPedido item2 = new ItemPedido(2, BigDecimal.valueOf(200),  UUID.randomUUID(), UUID.randomUUID());
+        Pedido pedido2 = new Pedido(idCliente, List.of(item2));
+
+        assertThat(pedido.getId()).isNotEqualTo(pedido2.getId());
     }
 }
