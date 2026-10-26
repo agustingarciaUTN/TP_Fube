@@ -4,6 +4,7 @@ import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,6 +15,9 @@ public class Pedido {
     private List<ItemPedido> items;
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaActualizacion;
+    private UUID id;
+    private BigDecimal montoTotal;
+
 
     public Pedido(UUID clienteId, List<ItemPedido> items) {
 
@@ -27,12 +31,14 @@ public class Pedido {
         LocalDateTime fecha = LocalDateTime.now();
         this.clienteId = clienteId;
         this.estado = EstadoPedido.CREADO;
-        this.items = items;
+        this.items = new ArrayList<>(items);
         this.fechaCreacion = fecha;
         this.fechaActualizacion = fecha;
+        this.id = UUID.randomUUID();
+        this.montoTotal = calcularMontoTotal();
     }
 
-    public BigDecimal montoTotal() {
+    private BigDecimal calcularMontoTotal() {
         return items.stream().map(ItemPedido::subtotal).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
