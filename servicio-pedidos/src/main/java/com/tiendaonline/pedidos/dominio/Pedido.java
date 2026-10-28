@@ -1,19 +1,38 @@
 package com.tiendaonline.pedidos.dominio;
 
+import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
+@Table(name = "pedidos")
 public class Pedido {
-    private UUID clienteId;
+
+
+    @Enumerated(EnumType.STRING)
     private EstadoPedido estado;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "pedido_id", nullable = false)
     private List<ItemPedido> items;
+
+    @Id
+    private UUID id;
+
+    private UUID clienteId;
+    private BigDecimal montoTotal;
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaActualizacion;
+
 
     public Pedido(UUID clienteId, List<ItemPedido> items) {
 
@@ -27,12 +46,14 @@ public class Pedido {
         LocalDateTime fecha = LocalDateTime.now();
         this.clienteId = clienteId;
         this.estado = EstadoPedido.CREADO;
-        this.items = items;
+        this.items = new ArrayList<>(items);
         this.fechaCreacion = fecha;
         this.fechaActualizacion = fecha;
+        this.id = UUID.randomUUID();
+        this.montoTotal = calcularMontoTotal();
     }
 
-    public BigDecimal montoTotal() {
+    private BigDecimal calcularMontoTotal() {
         return items.stream().map(ItemPedido::subtotal).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 

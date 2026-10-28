@@ -5,6 +5,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -13,7 +14,7 @@ public class ItemPedidoTest {
 
     @Test
     public void subtotalEsCantidadPorPrecioUnitario(){
-        ItemPedido item = new ItemPedido(2, new BigDecimal("10.50"));
+        ItemPedido item = new ItemPedido(2, new BigDecimal("10.50"), UUID.randomUUID(), UUID.randomUUID());
 
         BigDecimal resultado = item.subtotal();
 
@@ -32,7 +33,7 @@ public class ItemPedidoTest {
 
         BigDecimal precioUnitario = new BigDecimal(precioUnitarioString);
 
-        assertThatThrownBy(()-> new ItemPedido(cantidad, precioUnitario))
+        assertThatThrownBy(()-> new ItemPedido(cantidad, precioUnitario, UUID.randomUUID(), UUID.randomUUID()))
         .isInstanceOf(IllegalArgumentException.class).hasMessage(mensajeEsperado);
 
     }
@@ -40,10 +41,36 @@ public class ItemPedidoTest {
     @Test
     public void deberiaLanzarExcepcionParaValorNull(){
         BigDecimal precioUnitario = null;
-        assertThatThrownBy(() -> new ItemPedido(2, precioUnitario))
+        assertThatThrownBy(() -> new ItemPedido(2, precioUnitario, UUID.randomUUID(), UUID.randomUUID()))
         .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("El precio unitario no puede ser Null");
     }
 
+    @Test
+    public void deberiaLanzarExcepcionParaProductoNull(){
+        BigDecimal precioUnitario = new BigDecimal("10.50");
+        assertThatThrownBy(() -> new ItemPedido(2, precioUnitario, null, UUID.randomUUID()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("El producto no puede ser Null");
+    }
 
+    @Test
+    public void deberiaLanzarExcepcionParaReservaNull(){
+        BigDecimal precioUnitario = new BigDecimal("10.50");
+        assertThatThrownBy(() -> new ItemPedido(2, precioUnitario, UUID.randomUUID(), null))
+        .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("La reserva no puede ser Null");
+    }
+
+    @Test
+    public void creacionValidaDeItemPedido(){
+        UUID reservaId = UUID.randomUUID();
+        UUID productoId = UUID.randomUUID();
+
+        ItemPedido item = new ItemPedido(2, new BigDecimal("10.50"), productoId, reservaId);
+
+        assertThat(item.getProductoId()).isEqualTo(productoId);
+        assertThat(item.getReservaId()).isEqualTo(reservaId);
+
+    }
 }
