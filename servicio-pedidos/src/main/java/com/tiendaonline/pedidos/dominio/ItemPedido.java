@@ -1,13 +1,23 @@
 package com.tiendaonline.pedidos.dominio;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 
 @Getter
+@Entity
+@Table(name = "items_pedido")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ItemPedido {
+    @Id
+    private UUID id;
     private int cantidad;
     private BigDecimal precioUnitario;
     private UUID productoId;
@@ -36,6 +46,8 @@ public class ItemPedido {
         this.precioUnitario = precioUnitario;
         this.productoId = productoId;
         this.reservaId = reservaId;
+        this.id = UUID.randomUUID();
+
 
     }
 
