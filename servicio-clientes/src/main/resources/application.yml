@@ -15,3 +15,6 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+
+statsig:
+  secret-key: ${STATSIG_SECRET_KEY}
