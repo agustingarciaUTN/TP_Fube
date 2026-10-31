@@ -1,4 +1,4 @@
-package com.tiendaonline.inventario.modelo;
+package com.tiendaonline.inventario.Modelo;
 
 import jakarta.persistence.*;
 import lombok.*;

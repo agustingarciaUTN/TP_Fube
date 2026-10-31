@@ -1,4 +1,4 @@
-package com.tiendaonline.inventario.modelo;
+package com.tiendaonline.inventario.Modelo;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,4 +20,6 @@ public class Producto {
     private String sku;
     @Column(name = "cantidad_disponible")
     private int cantidadDisponible;
+    @Column(name = "precio_unitario")
+    private float precioUnitario;
 }

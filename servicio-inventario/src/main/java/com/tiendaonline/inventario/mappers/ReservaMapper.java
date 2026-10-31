@@ -1,7 +1,7 @@
 package com.tiendaonline.inventario.mappers;
 
 import com.tiendaonline.inventario.DTOs.ReservaDTO;
-import com.tiendaonline.inventario.modelo.Reserva;
+import com.tiendaonline.inventario.Modelo.Reserva;
 
 public class ReservaMapper {
     public static ReservaDTO toDTO(Reserva reserva){

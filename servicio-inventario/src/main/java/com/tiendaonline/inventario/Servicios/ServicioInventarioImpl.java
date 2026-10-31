@@ -4,7 +4,7 @@ import com.tiendaonline.inventario.DTOs.ProductoDTO;
 import com.tiendaonline.inventario.Excepciones.ProductoNoEncontradoException;
 import com.tiendaonline.inventario.Excepciones.StockNoSuficienteException;
 import com.tiendaonline.inventario.mappers.ProductoMapper;
-import com.tiendaonline.inventario.modelo.Producto;
+import com.tiendaonline.inventario.Modelo.Producto;
 import com.tiendaonline.inventario.repositorios.RepositorioProductos;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;

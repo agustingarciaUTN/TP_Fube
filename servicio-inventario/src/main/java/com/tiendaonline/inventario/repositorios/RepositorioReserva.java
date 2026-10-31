@@ -1,6 +1,6 @@
 package com.tiendaonline.inventario.repositorios;
 
-import com.tiendaonline.inventario.modelo.Reserva;
+import com.tiendaonline.inventario.Modelo.Reserva;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

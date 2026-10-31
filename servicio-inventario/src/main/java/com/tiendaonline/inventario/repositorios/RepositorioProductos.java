@@ -1,7 +1,7 @@
 package com.tiendaonline.inventario.repositorios;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.tiendaonline.inventario.modelo.Producto;
+import com.tiendaonline.inventario.Modelo.Producto;
 import org.springframework.stereotype.Repository;
 
 import java.util.UUID;

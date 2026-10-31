@@ -1,7 +1,7 @@
 package com.tiendaonline.inventario.mappers;
 
 import com.tiendaonline.inventario.DTOs.ProductoDTO;
-import com.tiendaonline.inventario.modelo.Producto;
+import com.tiendaonline.inventario.Modelo.Producto;
 
 public class ProductoMapper {
     public static ProductoDTO toDTO(Producto producto){
@@ -10,6 +10,7 @@ public class ProductoMapper {
                 .nombre(producto.getNombre())
                 .sku(producto.getSku())
                 .cantidadDisponible(producto.getCantidadDisponible())
+                .precioUnitario(producto.getPrecioUnitario())
                 .build();
     }
 
@@ -19,6 +20,7 @@ public class ProductoMapper {
                 .nombre(producto.getNombre())
                 .sku(producto.getSku())
                 .cantidadDisponible(producto.getCantidadDisponible())
+                .precioUnitario(producto.getPrecioUnitario())
                 .build();
     }
 }
