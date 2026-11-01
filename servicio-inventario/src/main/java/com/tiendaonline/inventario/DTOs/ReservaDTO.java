@@ -1,6 +1,5 @@
 package com.tiendaonline.inventario.DTOs;
 
-import com.tiendaonline.inventario.modelo.Reserva;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

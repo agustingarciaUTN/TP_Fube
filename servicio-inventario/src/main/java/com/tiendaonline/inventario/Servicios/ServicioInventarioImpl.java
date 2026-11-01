@@ -71,4 +71,16 @@ public class ServicioInventarioImpl implements ServicioInventario{
         //Se guarda el producto con el nuevo stock aumentado y se retorna
         return ProductoMapper.toDTO(repositorioProductos.save(producto));
     }
+
+    @Override
+    public float consultarPrecio(UUID id){
+        //Busca en el repositorio por id, si encuentra un producto -> map() a DTO
+        //Si no encuentra ningún producto con ese id -> orElseThrow() excepcion de producto no encontrado
+        ProductoDTO producto = repositorioProductos.findById(id)
+                .map(ProductoMapper::toDTO)
+                .orElseThrow( () -> new ProductoNoEncontradoException(
+                                "El id introducido no corresponde a ningún producto"));
+        //Retorna en precio unitario del producto
+        return producto.getCantidadDisponible();
+    }
 }

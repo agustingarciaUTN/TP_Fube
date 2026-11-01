@@ -10,6 +10,7 @@ public class ProductoMapper {
                 .nombre(producto.getNombre())
                 .sku(producto.getSku())
                 .cantidadDisponible(producto.getCantidadDisponible())
+                .precioUnitario(producto.getPrecioUnitario())
                 .build();
     }
 
@@ -19,6 +20,7 @@ public class ProductoMapper {
                 .nombre(producto.getNombre())
                 .sku(producto.getSku())
                 .cantidadDisponible(producto.getCantidadDisponible())
+                .precioUnitario(producto.getPrecioUnitario())
                 .build();
     }
 }

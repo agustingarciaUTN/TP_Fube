@@ -8,4 +8,5 @@ public interface ServicioInventario {
     public int consultarStock(UUID id);
     public ProductoDTO reducirStock(UUID id, int cantidad);
     public ProductoDTO aumentarStock(UUID id, int cantidad);
+    float consultarPrecio(UUID id);
 }
