@@ -4,7 +4,7 @@ import com.tiendaonline.inventario.DTOs.ProductoDTO;
 import com.tiendaonline.inventario.Excepciones.ProductoNoEncontradoException;
 import com.tiendaonline.inventario.Excepciones.StockNoSuficienteException;
 import com.tiendaonline.inventario.mappers.ProductoMapper;
-import com.tiendaonline.inventario.Modelo.Producto;
+import com.tiendaonline.inventario.modelo.Producto;
 import com.tiendaonline.inventario.repositorios.RepositorioProductos;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -70,5 +70,17 @@ public class ServicioInventarioImpl implements ServicioInventario{
         producto.setCantidadDisponible(stockActual+cantidad);
         //Se guarda el producto con el nuevo stock aumentado y se retorna
         return ProductoMapper.toDTO(repositorioProductos.save(producto));
+    }
+
+    @Override
+    public float consultarPrecio(UUID id){
+        //Busca en el repositorio por id, si encuentra un producto -> map() a DTO
+        //Si no encuentra ningún producto con ese id -> orElseThrow() excepcion de producto no encontrado
+        ProductoDTO producto = repositorioProductos.findById(id)
+                .map(ProductoMapper::toDTO)
+                .orElseThrow( () -> new ProductoNoEncontradoException(
+                                "El id introducido no corresponde a ningún producto"));
+        //Retorna en precio unitario del producto
+        return producto.getCantidadDisponible();
     }
 }

@@ -8,7 +8,7 @@ import com.tiendaonline.inventario.Excepciones.ReservaNoExistenteException;
 import com.tiendaonline.inventario.Excepciones.StockNoSuficienteException;
 import com.tiendaonline.inventario.Servicios.ServicioInventarioImpl;
 import com.tiendaonline.inventario.Servicios.ServicioReservaImpl;
-import com.tiendaonline.inventario.Modelo.Reserva;
+import com.tiendaonline.inventario.modelo.Reserva;
 import com.tiendaonline.inventario.repositorios.RepositorioReserva;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,7 +1,7 @@
 package com.tiendaonline.inventario.mappers;
 
 import com.tiendaonline.inventario.DTOs.ProductoDTO;
-import com.tiendaonline.inventario.Modelo.Producto;
+import com.tiendaonline.inventario.modelo.Producto;
 
 public class ProductoMapper {
     public static ProductoDTO toDTO(Producto producto){

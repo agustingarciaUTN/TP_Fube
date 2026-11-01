@@ -1,9 +1,8 @@
-package com.tiendaonline.inventario.Modelo;
+package com.tiendaonline.inventario.modelo;
 
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
