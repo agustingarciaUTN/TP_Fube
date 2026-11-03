@@ -1,6 +1,7 @@
 package com.tiendaonline.clientes.servicios;
 
 import com.tiendaonline.clientes.DTOs.ClienteDTO;
+import com.tiendaonline.clientes.DTOs.ListaPedidosResponseDTO;
 import com.tiendaonline.clientes.excepciones.*;
 import com.tiendaonline.clientes.mappers.ClienteMapper;
 import com.tiendaonline.clientes.modelo.Cliente;
@@ -18,9 +19,10 @@ import static java.util.Objects.isNull;
 
 @Service
 @AllArgsConstructor
-public class ServicioClientesImpl extends ServicioClientes{
+public class ServicioClientesImpl implements ServicioClientes{
     private final RepositorioClientes repositorioClientes;
     private final GestorFeatureFlagImpl gestorFeatureFlag;
+    private final ConectorPedidosImpl servicioPedidos;
 
     private static final Pattern PATRON_NOMBRE = Pattern.compile(
             "^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{3,}$"
@@ -30,6 +32,7 @@ public class ServicioClientesImpl extends ServicioClientes{
             "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$"
     );
 
+    @Override
     public ClienteDTO registrarCliente(ClienteDTO clienteDTO){
         verificarDatosRegistro(clienteDTO);
         if (repositorioClientes.existsByEmail(clienteDTO.getEmail())) {
@@ -46,7 +49,8 @@ public class ServicioClientesImpl extends ServicioClientes{
         return ClienteMapper.toDTO(repositorioClientes.save(cliente)) ;
     }
 
-    private void verificarDatosRegistro(ClienteDTO clienteDTO){
+    @Override
+    public void verificarDatosRegistro(ClienteDTO clienteDTO){
         if (isNull(clienteDTO.getNombre())||
                 !PATRON_NOMBRE.matcher(clienteDTO.getNombre().trim()).matches()) {
             throw new NombreInvalidoException("El nombre no es valido");
@@ -57,6 +61,7 @@ public class ServicioClientesImpl extends ServicioClientes{
         }
     }
 
+    @Override
     public ClienteDTO consultarClientePorId(UUID id){
         Cliente clienteEncontrado = repositorioClientes.findById(id)
                 .orElseThrow(() -> new ClienteNoEncontradoException("No se encontró el cliente con el id introducido"));
@@ -93,5 +98,10 @@ public class ServicioClientesImpl extends ServicioClientes{
         //Concatena "****@****" con lo que hay luego del ultimo punto
         return "****@****" + email.substring(ultimoPuntoIndex);
 
+    }
+
+    @Override
+    public ListaPedidosResponseDTO listarPedidosCliente(UUID idCliente){
+        return servicioPedidos.listarPedidosCliente(idCliente);
     }
 }

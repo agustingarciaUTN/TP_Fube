@@ -1,6 +1,9 @@
 package com.tiendaonline.clientes.servicios;
 
 import com.tiendaonline.clientes.DTOs.ClienteDTO;
+import com.tiendaonline.clientes.DTOs.ItemPedidoResponseDTO;
+import com.tiendaonline.clientes.DTOs.ListaPedidosResponseDTO;
+import com.tiendaonline.clientes.DTOs.PedidoResponseDTO;
 import com.tiendaonline.clientes.excepciones.*;
 import com.tiendaonline.clientes.modelo.Cliente;
 import com.tiendaonline.clientes.repositorios.RepositorioClientes;
@@ -15,6 +18,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -29,6 +36,9 @@ import static org.mockito.Mockito.*;
 public class ServicioClientesImplTest {
     @Mock
     RepositorioClientes repositorioClientes;
+
+    @Mock
+    ConectorPedidosImpl servicioPedidos;
 
     @Mock
     GestorFeatureFlagImpl gestorFeatureFlag;
@@ -214,4 +224,84 @@ public class ServicioClientesImplTest {
         assertEquals("No se encontró el cliente con el id introducido", exepcion.getMessage());
     }
 
+    ListaPedidosResponseDTO ejListaPedidosResp(){
+        return ListaPedidosResponseDTO.builder()
+                .pedidos(ejListaPedido())
+                .total(1)
+                .build();
+    }
+    List<PedidoResponseDTO> ejListaPedido(){
+        List<PedidoResponseDTO> lista = new ArrayList<>();
+        PedidoResponseDTO pedido = PedidoResponseDTO.builder()
+                .id( UUID.fromString("a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d"))
+                .clienteId(UUID.fromString("35dc8345-858b-4153-98d4-7cf74eb99a5a"))
+                .estado("CREADO")
+                .montoTotal(BigDecimal.valueOf(55.5))
+                .fechaCreacion(LocalDateTime.of(2026,8,10,12,4))
+                .fechaActualizacion(LocalDateTime.of(2026,9,12,14,4))
+                .items(ejItem())
+                .build();
+        lista.add(pedido);
+        return lista;
+    }
+     List<ItemPedidoResponseDTO> ejItem(){
+         List<ItemPedidoResponseDTO> lista = new ArrayList<>();
+         ItemPedidoResponseDTO item = ItemPedidoResponseDTO.builder()
+                 .id(UUID.fromString("d9307190-9557-4372-b4a5-24a561e890ff"))
+                 .productoId(UUID.fromString("c2b1c4d4-e5d2-818b-0a0f-8f2a3a2c7c5a"))
+                 .cantidad(5)
+                 .precioUnitario(BigDecimal.valueOf(11.1))
+                 .build();
+         lista.add(item);
+         return lista;
+     }
+
+    @Test
+    void listarPedidosCliente_Correcto(){
+        ClienteDTO dto = ejClienteDTO();
+        UUID idCliente = dto.getId();
+        ListaPedidosResponseDTO respuestaPedidos = ejListaPedidosResp();
+        given(servicioPedidos.listarPedidosCliente(idCliente)).willReturn(respuestaPedidos);
+
+        ListaPedidosResponseDTO resultado = servicioClientes.listarPedidosCliente(idCliente);
+
+        assertNotNull(resultado);
+        assertEquals(respuestaPedidos, resultado);
+    }
+
+    @Test
+    void listarPedidosCliente_Fallo_clienteNoEncontrado(){
+        ClienteDTO dto = ejClienteDTO();
+        UUID idCliente = dto.getId();
+        ListaPedidosResponseDTO respuestaPedidos = ejListaPedidosResp();
+        given(servicioPedidos.listarPedidosCliente(idCliente)).willThrow(
+                new ClienteNoEncontradoException("No se encontró el cliente con el id introducido")
+        );
+
+        ClienteNoEncontradoException excepcion = assertThrows(
+                ClienteNoEncontradoException.class,
+                () -> servicioClientes.listarPedidosCliente(idCliente)
+        );
+
+        verify(servicioPedidos, times(1)).listarPedidosCliente(idCliente);
+        assertEquals("No se encontró el cliente con el id introducido", excepcion.getMessage());
+    }
+
+    @Test
+    void listarPedidosCliente_Fallo_FalloServicioPedidos(){
+        ClienteDTO dto = ejClienteDTO();
+        UUID idCliente = dto.getId();
+        ListaPedidosResponseDTO respuestaPedidos = ejListaPedidosResp();
+        given(servicioPedidos.listarPedidosCliente(idCliente)).willThrow(
+                new ServicioExternoNoDisponibleException("Ocurrió un error inesperado con el servicio de pedidos")
+        );
+
+        ServicioExternoNoDisponibleException excepcion = assertThrows(
+                ServicioExternoNoDisponibleException.class,
+                () -> servicioClientes.listarPedidosCliente(idCliente)
+        );
+
+        verify(servicioPedidos, times(1)).listarPedidosCliente(idCliente);
+        assertEquals("Ocurrió un error inesperado con el servicio de pedidos", excepcion.getMessage());
+    }
 }
