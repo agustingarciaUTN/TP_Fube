@@ -1,6 +1,7 @@
 package com.tiendaonline.clientes.controladores;
 
 import com.tiendaonline.clientes.DTOs.ClienteDTO;
+import com.tiendaonline.clientes.DTOs.ListaPedidosResponseDTO;
 import com.tiendaonline.clientes.servicios.ServicioClientesImpl;
 import com.tiendaonline.clientes.statsig.GestorFeatureFlag;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.statsig.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("v1/clientes")
@@ -21,9 +24,16 @@ public class ControladorClientes {
     public ClienteDTO registrarCliente(@RequestBody ClienteDTO cliente){
         return servicioClientes.registrarCliente(cliente);
     }
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping
-    public boolean prueba(){
-        return gestorFeatureFlag.isFlagActivo("mask-pii");
+
+    @ResponseStatus(HttpStatus.OK) //Por defecto se retorna 200 OK, si hay excepcion se trata en el RestExceptionHandler
+    @GetMapping("/{id}")
+    public ClienteDTO consultarCliente(@PathVariable UUID id){
+        return servicioClientes.consultarClientePorId(id);
+    }
+
+    @ResponseStatus(HttpStatus.OK) //Por defecto se retorna 200 OK, si hay excepcion se trata en el RestExceptionHandler
+    @GetMapping("/{id}/pedidos")
+    public ListaPedidosResponseDTO listarPedidosCliente(@PathVariable UUID id){
+        return servicioClientes.listarPedidosCliente(id);
     }
 }
