@@ -4,6 +4,9 @@ import com.statsig.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
 @Component
 @RequiredArgsConstructor
 public class GestorFeatureFlagImpl implements GestorFeatureFlag{
@@ -12,7 +15,7 @@ public class GestorFeatureFlagImpl implements GestorFeatureFlag{
     @Override
     public boolean isFlagActivo(String flagName) {
         StatsigUser usuario = new StatsigUser.Builder()
-                .setUserID("sistema")
+                .setUserID(LocalDateTime.now().toString())
                 .build();
 
         return statsig.checkGate(usuario, flagName);
