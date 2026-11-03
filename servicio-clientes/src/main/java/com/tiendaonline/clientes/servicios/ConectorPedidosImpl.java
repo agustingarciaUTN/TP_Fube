@@ -24,6 +24,7 @@ public class ConectorPedidosImpl implements ConectorPedidos {
 
     public ListaPedidosResponseDTO listarPedidosCliente(UUID clienteId) {
         try{
+            //Se consulta al microservicio de pedidos y se retorna la respuesta como un ListaPedidosResponseDTO
             return restClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .path("/v1/pedidos")
@@ -31,9 +32,12 @@ public class ConectorPedidosImpl implements ConectorPedidos {
                             .build())
                     .retrieve()
                     .body(ListaPedidosResponseDTO.class);
+
         }catch (HttpClientErrorException.NotFound ex){
+            //Si recibe 404
             throw new ClienteNoEncontradoException(ex.getMessage());
         } catch (ResourceAccessException | HttpServerErrorException e) {
+            //Si recibe un error
             throw new ServicioExternoNoDisponibleException("El servicio de pedidos no está disponible");
         }
     }

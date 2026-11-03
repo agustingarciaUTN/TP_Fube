@@ -12,12 +12,4 @@ public class ClienteMapper {
                 .fechaAlta(cliente.getFechaAlta())
                 .build();
     }
-    public static Cliente toEntity(ClienteDTO cliente){
-        return Cliente.builder()
-                .id(cliente.getId())
-                .nombre(cliente.getNombre())
-                .email(cliente.getEmail())
-                .fechaAlta(cliente.getFechaAlta())
-                .build();
-    }
 }
