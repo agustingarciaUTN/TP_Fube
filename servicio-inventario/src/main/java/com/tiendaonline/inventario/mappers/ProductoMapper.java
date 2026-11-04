@@ -14,13 +14,4 @@ public class ProductoMapper {
                 .build();
     }
 
-    public static Producto toEntity(ProductoDTO producto){
-        return Producto.builder()
-                .id(producto.getId())
-                .nombre(producto.getNombre())
-                .sku(producto.getSku())
-                .cantidadDisponible(producto.getCantidadDisponible())
-                .precioUnitario(producto.getPrecioUnitario())
-                .build();
-    }
 }
