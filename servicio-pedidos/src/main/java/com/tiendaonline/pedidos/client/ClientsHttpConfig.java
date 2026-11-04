@@ -6,6 +6,7 @@ import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 import java.time.Duration;
@@ -36,7 +37,7 @@ public class ClientsHttpConfig {
         ClientHttpRequestFactorySettings configuracion = ClientHttpRequestFactorySettings.DEFAULTS
                 .withConnectTimeout(timeoutConexion)
                 .withReadTimeout(timeoutLectura);
-        return ClientHttpRequestFactories.get(configuracion);
+        return ClientHttpRequestFactories.get(JdkClientHttpRequestFactory.class, configuracion);
     }
 
 }
