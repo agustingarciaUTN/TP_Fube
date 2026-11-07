@@ -17,7 +17,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ControladorClientes {
     private final ServicioClientesImpl servicioClientes;
-    private final GestorFeatureFlag gestorFeatureFlag;
 
     @ResponseStatus(HttpStatus.CREATED) //Por defecto se retorna 201 CREATED, si hay excepcion se trata en el RestExceptionHandler
     @PostMapping
