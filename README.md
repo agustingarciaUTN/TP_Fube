@@ -1,4 +1,4 @@
-# TiendaOnline
+# TP Fundamentos del Desarrollo Backend
 
 Trabajo práctico final de Fundamentos de Desarrollo Backend (UTN FRSF, 2026).
 
