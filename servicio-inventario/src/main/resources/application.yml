@@ -5,9 +5,9 @@ spring:
   application:
     name: servicio-inventario
   datasource:
-    url: jdbc:postgresql://localhost:5432/inventario_db
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://localhost:5433/inventario_db
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
   jpa:
     open-in-view: false
     hibernate:
