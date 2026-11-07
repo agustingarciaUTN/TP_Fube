@@ -45,7 +45,7 @@ public class InventarioClientHttp implements InventarioClient {
 
             return new ReservaConfirmada(respuesta.id(), precio);
         } catch (HttpClientErrorException.NotFound e) {
-            throw new ProductoNoEncontradoException("Producto no encontrado");
+            throw new ProductoNoEncontradoException("Producto " + productoId + " no encontrado");
         } catch (HttpClientErrorException.Conflict e) {
             throw new StockInsuficienteException("No se puede realizar la reserva del producto " + productoId);
         } catch (HttpServerErrorException | ResourceAccessException e) {
@@ -62,7 +62,7 @@ public class InventarioClientHttp implements InventarioClient {
                     .retrieve()
                     .toBodilessEntity();
         } catch (HttpClientErrorException.Conflict e) {
-            log.info("La reserva {} ya estaba disuelta", reservaId);
+            log.info("La reserva {} ya estaba liberada", reservaId);
         } catch (HttpClientErrorException.NotFound e) {
             log.warn("La reserva {} no existe", reservaId);
         } catch (HttpServerErrorException | ResourceAccessException e) {
