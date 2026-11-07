@@ -1,0 +1,2 @@
+ALTER TABLE productos
+ADD COLUMN precio_unitario REAL NOT NULL DEFAULT 0;

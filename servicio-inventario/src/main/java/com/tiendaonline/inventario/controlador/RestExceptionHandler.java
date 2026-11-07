@@ -22,7 +22,6 @@ public class RestExceptionHandler {
     public ErrorDTO handleStockNoSuficiente(StockNoSuficienteException ex){
         return new ErrorDTO("CONFLICT", ex.getMessage());
     }
-
     @ExceptionHandler(ReservaLiberadaException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorDTO handleStockNoSuficiente(ReservaLiberadaException ex){

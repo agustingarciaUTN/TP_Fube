@@ -19,4 +19,9 @@ public class ControladorProductos {
     public int consultarStockProducto(@PathVariable UUID id){
         return servicioInventario.consultarStock(id);
     }
+    @GetMapping("/{id}/precio")
+    @ResponseStatus(HttpStatus.OK) //Por defecto se retorna 200 OK, si hay excepcion se trata en el RestExceptionHandler
+    public Float consultarPrecioProducto(@PathVariable UUID id){
+        return servicioInventario.consultarPrecio(id);
+    }
 }
