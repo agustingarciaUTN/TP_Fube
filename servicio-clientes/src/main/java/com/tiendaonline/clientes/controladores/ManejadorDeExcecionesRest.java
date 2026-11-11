@@ -2,6 +2,7 @@ package com.tiendaonline.clientes.controladores;
 
 import com.tiendaonline.clientes.DTOs.ErrorDTO;
 import com.tiendaonline.clientes.excepciones.*;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 @RestControllerAdvice
+@Hidden //Para evitar que swagger muestre respuestas que no fueron planeadas
 public class ManejadorDeExcecionesRest {
     @ExceptionHandler(EmailExistenteException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
