@@ -20,4 +20,6 @@ public class Producto {
     private String sku;
     @Column(name = "cantidad_disponible")
     private int cantidadDisponible;
+    @Column(name = "precio_unitario")
+    private float precioUnitario;
 }

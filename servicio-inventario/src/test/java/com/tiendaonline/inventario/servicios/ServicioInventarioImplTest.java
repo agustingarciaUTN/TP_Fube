@@ -35,7 +35,7 @@ class ServicioInventarioImplTest {
                 .id(UUID.fromString("a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d"))
                 .nombre("Monitor 24 Pulgadas IPS")
                 .sku("PROD-TEST-001")
-                .cantidadDisponible(15)
+                .precioUnitario(5.0F)
                 .build();
     }
 
@@ -45,6 +45,7 @@ class ServicioInventarioImplTest {
                 .nombre("Monitor 24 Pulgadas IPS")
                 .sku("PROD-TEST-001")
                 .cantidadDisponible(15)
+                .precioUnitario(5.0F)
                 .build();
     }
 
@@ -176,6 +177,33 @@ class ServicioInventarioImplTest {
         verify(repositorioProductos, times(1)).findById(idDTO);
         verify(repositorioProductos, never()).save(any(Producto.class));
         assertEquals("El id introducido no corresponde a ningún producto", excepcion.getMessage());
+    }
+
+    @Test
+    void consultarPrecio_Correcto() {
+        ProductoDTO productoDTO = ejProducto1DTO();
+        UUID idDTO = productoDTO.getId();
+        Producto producto = ejProducto1Entity();
+        given(repositorioProductos.findById(idDTO)).willReturn(Optional.of(producto));
+
+        Float precioUnitario = servicioInventario.consultarPrecio(idDTO);
+
+        assertThat(precioUnitario).isEqualTo(15);
+        verify(repositorioProductos, times(1)).findById(idDTO);
+    }
+
+    @Test
+    void consultarPrecio_Fallo_ProductoNoExiste() {
+        UUID idDTO = ejProducto1DTO().getId();
+        given(repositorioProductos.findById(idDTO)).willReturn(Optional.empty());
+
+        ProductoNoEncontradoException excepcion = assertThrows(
+                ProductoNoEncontradoException.class,
+                () -> servicioInventario.consultarPrecio(idDTO)
+        );
+
+        assertEquals("El id introducido no corresponde a ningún producto", excepcion.getMessage());
+        verify(repositorioProductos, times(1)).findById(idDTO);
     }
 
 }
