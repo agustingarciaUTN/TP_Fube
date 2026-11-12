@@ -218,4 +218,75 @@ public class PedidoServiceTest {
         verify(inventarioClient).liberar(reservaAId);
         verify(pedidoRepositorio, never()).save(any(Pedido.class));
     }
+
+    @Test
+    void cancelarPedidoCreadoLiberaReservasYQuedaCancelado(){
+        UUID clienteId = UUID.randomUUID();
+        Pedido pedido = pedidoValido(clienteId);
+
+        when(pedidoRepositorio.findById(pedido.getId())).thenReturn(Optional.of(pedido));
+
+        PedidoResponse respuesta = servicio.cambiarEstado(pedido.getId(), EstadoPedido.CANCELADO);
+
+        assertThat(respuesta.estado()).isEqualTo(EstadoPedido.CANCELADO);
+        verify(inventarioClient).liberar(pedido.getItems().get(0).getReservaId());
+        verify(inventarioClient).liberar(pedido.getItems().get(1).getReservaId());
+        verify(pedidoRepositorio).save(pedido);
+    }
+
+    @Test
+    void cancelarPedidoInexistenteLanzaExcepcion(){
+        UUID id = UUID.randomUUID();
+
+        when(pedidoRepositorio.findById(id)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> servicio.cambiarEstado(id, EstadoPedido.CANCELADO))
+                .isInstanceOf(PedidoNoEncontradoException.class);
+        verifyNoInteractions(inventarioClient);
+        verify(pedidoRepositorio, never()).save(any(Pedido.class));
+    }
+
+    @Test
+    void cancelarPedidoYaCanceladoLanzaTransicionInvalida(){
+        UUID clienteId = UUID.randomUUID();
+        Pedido pedido = pedidoValido(clienteId);
+
+        pedido.cambiarEstado(EstadoPedido.CANCELADO);
+        when(pedidoRepositorio.findById(pedido.getId())).thenReturn(Optional.of(pedido));
+
+        assertThatThrownBy(() -> servicio.cambiarEstado(pedido.getId(), EstadoPedido.CANCELADO))
+                .isInstanceOf(TransicionInvalidaException.class);
+
+        verifyNoInteractions(inventarioClient);
+        verify(pedidoRepositorio, never()).save(any(Pedido.class));
+    }
+
+    @Test
+    void inventarioCaidoAlCancelarNoGuarda(){
+        UUID clienteId = UUID.randomUUID();
+        Pedido pedido = pedidoValido(clienteId);
+
+        when(pedidoRepositorio.findById(pedido.getId())).thenReturn(Optional.of(pedido));
+        doThrow(new ServicioNoDisponibleException("El servicio de inventarios se encontro caido al liberar"))
+                .when(inventarioClient).liberar(any(UUID.class));
+
+        assertThatThrownBy(() -> servicio.cambiarEstado(pedido.getId(), EstadoPedido.CANCELADO))
+                .isInstanceOf(ServicioNoDisponibleException.class);
+
+        verify(pedidoRepositorio, never()).save(any(Pedido.class));
+    }
+
+    @Test
+    void confirmarPedidoCreadoNoLiberaReservas(){
+        UUID clienteId = UUID.randomUUID();
+        Pedido pedido = pedidoValido(clienteId);
+
+        when(pedidoRepositorio.findById(pedido.getId())).thenReturn(Optional.of(pedido));
+
+        PedidoResponse respuesta = servicio.cambiarEstado(pedido.getId(), EstadoPedido.CONFIRMADO);
+
+        assertThat(respuesta.estado()).isEqualTo(EstadoPedido.CONFIRMADO);
+        verifyNoInteractions(inventarioClient);
+        verify(pedidoRepositorio).save(pedido);
+    }
 }
