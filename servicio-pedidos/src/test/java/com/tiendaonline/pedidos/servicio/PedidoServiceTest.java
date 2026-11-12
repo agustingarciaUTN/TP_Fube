@@ -1,9 +1,12 @@
 package com.tiendaonline.pedidos.servicio;
 
-import com.tiendaonline.pedidos.dominio.EstadoPedido;
-import com.tiendaonline.pedidos.dominio.ItemPedido;
-import com.tiendaonline.pedidos.dominio.Pedido;
-import com.tiendaonline.pedidos.dominio.PedidoNoEncontradoException;
+import com.tiendaonline.pedidos.client.ClientesClient;
+import com.tiendaonline.pedidos.client.InventarioClient;
+import com.tiendaonline.pedidos.client.ReservaConfirmada;
+import com.tiendaonline.pedidos.client.ServicioNoDisponibleException;
+import com.tiendaonline.pedidos.dominio.*;
+import com.tiendaonline.pedidos.dto.CrearPedidoRequest;
+import com.tiendaonline.pedidos.dto.ItemPedidoRequest;
 import com.tiendaonline.pedidos.dto.ListaPedidosResponse;
 import com.tiendaonline.pedidos.dto.PedidoResponse;
 import com.tiendaonline.pedidos.repositorio.PedidoRepository;
@@ -20,12 +23,20 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class PedidoServiceTest {
     @Mock
     private PedidoRepository pedidoRepositorio;
+
+    @Mock
+    private ClientesClient clientesClient;
+
+    @Mock
+    private InventarioClient inventarioClient;
 
     @InjectMocks
     private PedidoService servicio;
@@ -91,5 +102,120 @@ public class PedidoServiceTest {
 
         assertThat(respuesta.total()).isZero();
         assertThat(respuesta.items()).isEmpty();
+    }
+
+    @Test
+    public void crearPedidoConDosItemsReservaCadaUnoYCalculaElTotal(){
+        UUID clienteId = UUID.randomUUID();
+        UUID productoAId = UUID.randomUUID();
+        UUID productoBId = UUID.randomUUID();
+        UUID reservaAId = UUID.randomUUID();
+        UUID reservaBId = UUID.randomUUID();
+        ItemPedidoRequest itemPedidoRequest = new ItemPedidoRequest(productoAId, 2);
+        ItemPedidoRequest itemPedidoRequest2 = new ItemPedidoRequest(productoBId, 3);
+
+        when(clientesClient.clienteExiste(clienteId)).thenReturn(true);
+        when(inventarioClient.reservar(eq(productoAId), eq(2), any(UUID.class)))
+                .thenReturn(new ReservaConfirmada(reservaAId, new BigDecimal("100")));
+        when(inventarioClient.reservar(eq(productoBId), eq(3), any(UUID.class)))
+                .thenReturn(new ReservaConfirmada(reservaBId, new BigDecimal("200")));
+
+        CrearPedidoRequest pedidoRequest = new  CrearPedidoRequest(clienteId, List.of(itemPedidoRequest, itemPedidoRequest2));
+
+        PedidoResponse respuesta = servicio.crear(pedidoRequest);
+
+        assertThat(respuesta).isNotNull();
+        assertThat(respuesta.montoTotal()).isEqualByComparingTo(new BigDecimal("800"));
+        assertThat(respuesta.estado()).isEqualTo(EstadoPedido.CREADO);
+        assertThat(respuesta.items()).hasSize(2);
+
+        verify(pedidoRepositorio).save(any(Pedido.class));
+    }
+
+    @Test
+    public void crearPedidoConClienteInexistenteLanzaExcepcionYNoReserva(){
+        UUID clienteId = UUID.randomUUID();
+        ItemPedidoRequest itemPedidoRequest = new ItemPedidoRequest(UUID.randomUUID(), 2);
+        CrearPedidoRequest pedidoRequest = new  CrearPedidoRequest(clienteId, List.of(itemPedidoRequest));
+
+        when(clientesClient.clienteExiste(clienteId)).thenReturn(false);
+
+        assertThatThrownBy(() -> servicio.crear(pedidoRequest))
+                .isInstanceOf(ClienteNoEncontradoException.class)
+                .hasMessage("El cliente " + clienteId + " no existe");
+
+        verifyNoInteractions(inventarioClient);
+        verify(pedidoRepositorio, never()).save(any(Pedido.class));
+    }
+
+    @Test
+    public void sinStockEnElPrimerItemNoGuardaNiLibera(){
+        UUID clienteId = UUID.randomUUID();
+        UUID productoAId = UUID.randomUUID();
+        ItemPedidoRequest itemPedidoRequest = new ItemPedidoRequest(productoAId, 2);
+        ItemPedidoRequest itemPedidoRequest2 = new ItemPedidoRequest(UUID.randomUUID(), 3);
+        CrearPedidoRequest pedidoRequest = new  CrearPedidoRequest(clienteId, List.of(itemPedidoRequest, itemPedidoRequest2));
+
+        when(clientesClient.clienteExiste(clienteId)).thenReturn(true);
+        when(inventarioClient.reservar(eq(productoAId), eq(2), any(UUID.class)))
+                .thenThrow(StockInsuficienteException.class);
+
+        assertThatThrownBy(() -> servicio.crear(pedidoRequest))
+                .isInstanceOf(StockInsuficienteException.class);
+
+        verify(inventarioClient, never()).liberar(any(UUID.class));
+        verify(pedidoRepositorio, never()).save(any(Pedido.class));
+    }
+
+    @Test
+    public void sinStockEnElSegundoItemLiberaLaReservaDelPrimero() {
+        UUID clienteId = UUID.randomUUID();
+        UUID productoAId = UUID.randomUUID();
+        UUID productoBId = UUID.randomUUID();
+        UUID reservaAId = UUID.randomUUID();
+        ItemPedidoRequest itemPedidoRequest = new ItemPedidoRequest(productoAId, 2);
+        ItemPedidoRequest itemPedidoRequest2 = new ItemPedidoRequest(productoBId, 3);
+        CrearPedidoRequest pedidoRequest = new  CrearPedidoRequest(clienteId, List.of(itemPedidoRequest, itemPedidoRequest2));
+
+        when(clientesClient.clienteExiste(clienteId)).thenReturn(true);
+        when(inventarioClient.reservar(eq(productoAId), eq(2), any(UUID.class)))
+                .thenReturn(new ReservaConfirmada(reservaAId, new BigDecimal("100")));
+        when(inventarioClient.reservar(eq(productoBId), eq(3), any(UUID.class)))
+                .thenThrow(StockInsuficienteException.class);
+
+
+        assertThatThrownBy(() -> servicio.crear(pedidoRequest))
+                .isInstanceOf(StockInsuficienteException.class);
+
+        verify(inventarioClient).liberar(reservaAId);
+        verify(pedidoRepositorio, never()).save(any(Pedido.class));
+    }
+
+    @Test
+    public void inventarioCaidoAMitadDelPedidoLiberaLoReservado(){
+        UUID clienteId = UUID.randomUUID();
+        UUID productoAId = UUID.randomUUID();
+        UUID productoBId = UUID.randomUUID();
+        UUID reservaAId = UUID.randomUUID();
+        ItemPedidoRequest itemPedidoRequest = new ItemPedidoRequest(productoAId, 2);
+        ItemPedidoRequest itemPedidoRequest2 = new ItemPedidoRequest(productoBId, 3);
+        CrearPedidoRequest pedidoRequest = new  CrearPedidoRequest(clienteId, List.of(itemPedidoRequest, itemPedidoRequest2));
+
+        String mensajeErrorReservar = "El servicio de inventarios se encontro caido al reservar";
+
+        when(clientesClient.clienteExiste(clienteId)).thenReturn(true);
+        when(inventarioClient.reservar(eq(productoAId), eq(2), any(UUID.class)))
+                .thenReturn(new ReservaConfirmada(reservaAId, new BigDecimal("100")));
+        when(inventarioClient.reservar(eq(productoBId), eq(3), any(UUID.class)))
+                .thenThrow(new ServicioNoDisponibleException(mensajeErrorReservar));
+        doThrow(new ServicioNoDisponibleException("El servicio de inventarios se encontro caido al liberar"))
+                .when(inventarioClient).liberar(any(UUID.class));
+
+        assertThatThrownBy(() -> servicio.crear(pedidoRequest))
+                .isInstanceOf(ServicioNoDisponibleException.class)
+                .hasMessage(mensajeErrorReservar);
+
+        verify(inventarioClient).liberar(reservaAId);
+        verify(pedidoRepositorio, never()).save(any(Pedido.class));
     }
 }

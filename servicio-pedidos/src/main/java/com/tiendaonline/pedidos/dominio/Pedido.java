@@ -36,11 +36,18 @@ public class Pedido {
 
     public Pedido(UUID clienteId, List<ItemPedido> items) {
 
+        this(clienteId, items, UUID.randomUUID());
+    }
+
+    public Pedido(UUID clienteId, List<ItemPedido> items, UUID id){
         if (clienteId == null) {
             throw new IllegalArgumentException("Un pedido debe tener asignado un cliente");
         }
         if (items == null || items.isEmpty()) {
             throw new IllegalArgumentException("Un pedido debe tener al menos un item asignado.");
+        }
+        if (id == null) {
+            throw new IllegalArgumentException("Un pedido debe tener asignado un ID.");
         }
 
         LocalDateTime fecha = LocalDateTime.now();
@@ -49,7 +56,7 @@ public class Pedido {
         this.items = new ArrayList<>(items);
         this.fechaCreacion = fecha;
         this.fechaActualizacion = fecha;
-        this.id = UUID.randomUUID();
+        this.id = id;
         this.montoTotal = calcularMontoTotal();
     }
 
