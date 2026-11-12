@@ -1,5 +1,6 @@
 package com.tiendaonline.pedidos.controlador;
 
+import com.tiendaonline.pedidos.dto.CambiarEstadoRequest;
 import com.tiendaonline.pedidos.dto.CrearPedidoRequest;
 import com.tiendaonline.pedidos.dto.ListaPedidosResponse;
 import com.tiendaonline.pedidos.dto.PedidoResponse;
@@ -42,4 +43,9 @@ public class PedidoController {
         return ResponseEntity.created(uri).body(pedido);
     }
 
+    @PatchMapping("/{id}")
+    public PedidoResponse cambiarEstado(@PathVariable UUID id,
+                                        @Valid @RequestBody CambiarEstadoRequest request){
+        return pedidoService.cambiarEstado(id, request.estado());
+    }
 }

@@ -1,10 +1,7 @@
 package com.tiendaonline.pedidos.controlador;
 
 import com.tiendaonline.pedidos.client.ServicioNoDisponibleException;
-import com.tiendaonline.pedidos.dominio.ClienteNoEncontradoException;
-import com.tiendaonline.pedidos.dominio.PedidoNoEncontradoException;
-import com.tiendaonline.pedidos.dominio.ProductoNoEncontradoException;
-import com.tiendaonline.pedidos.dominio.StockInsuficienteException;
+import com.tiendaonline.pedidos.dominio.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -46,6 +43,13 @@ public class ManejadorDeErrores extends ResponseEntityExceptionHandler {
     public ProblemDetail servicioNoDisponible(ServicioNoDisponibleException ex){
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
         problemDetail.setTitle("El servicio no se encuentra disponible");
+        return problemDetail;
+    }
+
+    @ExceptionHandler(TransicionInvalidaException.class)
+    public ProblemDetail transicionInvalida(TransicionInvalidaException ex){
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+        problemDetail.setTitle("Transicion de estado invalida");
         return problemDetail;
     }
 }
