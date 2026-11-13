@@ -1,9 +1,6 @@
 package com.tiendaonline.pedidos.controlador;
 
-import com.tiendaonline.pedidos.dominio.ItemPedido;
-import com.tiendaonline.pedidos.dominio.Pedido;
-import com.tiendaonline.pedidos.dominio.PedidoNoEncontradoException;
-import com.tiendaonline.pedidos.dominio.StockInsuficienteException;
+import com.tiendaonline.pedidos.dominio.*;
 import com.tiendaonline.pedidos.dto.CrearPedidoRequest;
 import com.tiendaonline.pedidos.dto.ListaPedidosResponse;
 import com.tiendaonline.pedidos.dto.PedidoResponse;
@@ -23,8 +20,7 @@ import java.util.UUID;
 import static org.hamcrest.Matchers.endsWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(PedidoController.class)
@@ -133,5 +129,44 @@ public class PedidoControllerTest {
                         .content(jsonPedido(UUID.randomUUID(), UUID.randomUUID())))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.title").value("Stock insuficiente"));
+    }
+
+    @Test
+    void cambiarEstadoDevuelve200() throws Exception {
+        Pedido pedido = pedidoValido(UUID.randomUUID());
+
+        when(pedidoService.cambiarEstado(eq(pedido.getId()), eq(EstadoPedido.CANCELADO)))
+                .thenReturn(PedidoResponse.desde(pedido));
+
+        mockMvc.perform(patch("/v1/pedidos/{id}", pedido.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"estado\":\"CANCELADO\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(pedido.getId().toString()));
+    }
+
+    @Test
+    void cambiarEstadoConTransicionInvalidaDevuelve409() throws Exception {
+
+        when(pedidoService.cambiarEstado(any(UUID.class), any(EstadoPedido.class)))
+                .thenThrow(new TransicionInvalidaException("Transicion invalida"));
+
+        mockMvc.perform(patch("/v1/pedidos/{id}", UUID.randomUUID())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"estado\":\"EXPIRADO\"}"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.title").value("Transicion de estado invalida"));
+    }
+
+    @Test
+    void cambiarEstadoConEstadoInexistenteDevuelve400() throws Exception {
+        Pedido pedido = pedidoValido(UUID.randomUUID());
+
+        mockMvc.perform(patch("/v1/pedidos/{id}", pedido.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"estado\":\"ENVIADO\"}"))
+                .andExpect(status().isBadRequest());
+
+        verify(pedidoService, never()).cambiarEstado(any(UUID.class), any(EstadoPedido.class));
     }
 }

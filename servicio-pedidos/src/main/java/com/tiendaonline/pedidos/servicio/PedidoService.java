@@ -69,4 +69,23 @@ public class PedidoService {
         pedidoRepository.save(pedido);
         return PedidoResponse.desde(pedido);
     }
+
+    public PedidoResponse cambiarEstado(UUID id, EstadoPedido estadoFinal) {
+        Pedido pedido = pedidoRepository.findById(id).orElseThrow(() -> new PedidoNoEncontradoException("El pedido indicado no existe"));
+
+        if (estadoFinal == EstadoPedido.EXPIRADO){
+            throw new TransicionInvalidaException("Un pedido no puede pasar a EXPIRADO desde la API, ese estado lo asigna solo un proceso automatico");
+        }
+
+        pedido.cambiarEstado(estadoFinal);
+
+        if (estadoFinal == EstadoPedido.CANCELADO){
+            for(ItemPedido item : pedido.getItems()){
+                inventarioClient.liberar(item.getReservaId());
+            }
+        }
+
+        pedidoRepository.save(pedido);
+        return PedidoResponse.desde(pedido);
+    }
 }
