@@ -7,12 +7,14 @@ import com.tiendaonline.inventario.mappers.ProductoMapper;
 import com.tiendaonline.inventario.modelo.Producto;
 import com.tiendaonline.inventario.repositorios.RepositorioProductos;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ServicioInventarioImpl implements ServicioInventario{
     private final RepositorioProductos repositorioProductos;
 
@@ -43,6 +45,7 @@ public class ServicioInventarioImpl implements ServicioInventario{
         int stockActual = producto.getCantidadDisponible();
         //Si hay suficiente stock para reducir cantidad sin que se haga negativo
         if(stockActual>=cantidad){
+            log.info("");
             //Se reduce el stock en cantidad
             producto.setCantidadDisponible(stockActual-cantidad);
             //Se guarda el producto con el nuevo stock reducido y se retorna
