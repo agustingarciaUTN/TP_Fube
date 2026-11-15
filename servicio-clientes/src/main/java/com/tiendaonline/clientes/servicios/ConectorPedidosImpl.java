@@ -16,12 +16,13 @@ import java.util.UUID;
 public class ConectorPedidosImpl implements ConectorPedidos {
     private final RestClient restClient;
 
-    public ConectorPedidosImpl(@Value("${servicios.pedidos.url}") String pedidosBaseUrl) {
-        this.restClient = RestClient.builder()
+    public ConectorPedidosImpl(RestClient.Builder builder, @Value("${servicios.pedidos.url}") String pedidosBaseUrl) {
+        this.restClient = builder
                 .baseUrl(pedidosBaseUrl)
                 .build();
     }
 
+    @Override
     public ListaPedidosResponseDTO listarPedidosCliente(UUID clienteId) {
         try{
             //Se consulta al microservicio de pedidos y se retorna la respuesta como un ListaPedidosResponseDTO
