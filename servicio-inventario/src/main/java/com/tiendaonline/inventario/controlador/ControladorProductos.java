@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @Tag(name = "Productos", description = "Operaciones relacionadas con los productos de la tienda")
-//Para swagger. Se accede en: http://localhost:8083/swagger-ui/index.html
-//O en OpenAPI: http://localhost:8083/v3/api-docs
+//Para swagger. Se accede en: http://localhost:8082/swagger-ui/index.html
+//O en OpenAPI: http://localhost:8082/v3/api-docs
 @RestController
 @RequestMapping("/v1/productos")
 @AllArgsConstructor
