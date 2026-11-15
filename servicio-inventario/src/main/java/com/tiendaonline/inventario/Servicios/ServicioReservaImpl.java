@@ -7,6 +7,7 @@ import com.tiendaonline.inventario.mappers.ReservaMapper;
 import com.tiendaonline.inventario.repositorios.RepositorioReserva;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ import java.util.UUID;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ServicioReservaImpl implements ServicioReserva{
     private final RepositorioReserva repositorioReserva;
     private final ServicioInventarioImpl servicioInventario;
@@ -22,6 +24,7 @@ public class ServicioReservaImpl implements ServicioReserva{
     @Transactional //Es transactional para que si falla luego de reducir stock, esta acción se revierta
     @Override
     public ReservaDTO reservarProducto(ReservaDTO res){
+        log.info("Iniciado el proceso de reserva de producto");
         //Se crean las variables cantidad, idProducto e idPedido con los valores de la reserva recibida
         int cantidad = res.getCantidad();
         UUID idProducto = res.getProductoId();
@@ -37,14 +40,18 @@ public class ServicioReservaImpl implements ServicioReserva{
 
         //Reducir cantidad en Producto
         servicioInventario.reducirStock(reserva.getProductoId(), reserva.getCantidad());
+        log.info("Reducido el stock del producto");
         //Guardar la reserva y retornar ReservaDTO
-        return ReservaMapper.toDTO(repositorioReserva.save(ReservaMapper.toEntity(reserva)));
+        ReservaDTO reservaGuardada = ReservaMapper.toDTO(repositorioReserva.save(ReservaMapper.toEntity(reserva)));
+        log.info("Reserva guardada en la base de datos");
+        return reservaGuardada;
     }
 
     //Funcion para liberar la reserva, recibe el id de la reserva
     @Transactional
     @Override
     public ReservaDTO liberarReserva(UUID reservaId){
+        log.info("Iniciado el proceso de liberar reserva");
         //Busca la reserva por id, si la encuentra la convierte a DTO, si no la encuentra lanza excepcion
         ReservaDTO reserva = repositorioReserva.findById(reservaId)
                 .map(ReservaMapper::toDTO)
@@ -56,6 +63,7 @@ public class ServicioReservaImpl implements ServicioReserva{
             reserva.setEstado("LIBERADA");
             //Aumentar cantidad en Producto
             servicioInventario.aumentarStock(reserva.getProductoId(), reserva.getCantidad());
+            log.info("Liberado el sock reservado del producto");
             //Guardar la reserva y retornar ReservaDTO
             return ReservaMapper.toDTO(repositorioReserva.save(ReservaMapper.toEntity(reserva)));
 
