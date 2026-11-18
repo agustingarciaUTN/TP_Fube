@@ -15,6 +15,7 @@ import org.springframework.batch.item.database.JpaCursorItemReader;
 import org.springframework.batch.item.database.builder.JpaCursorItemReaderBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.time.LocalDateTime;
@@ -52,7 +53,8 @@ public class ExpiracionPedidosJobConfig {
     }
 
     @Bean
-    public Job expirarPedidosJob(JobRepository repository, Step expirarPedidosStep) {
-        return new JobBuilder("expirarPedidosJob", repository).start(expirarPedidosStep).build();
+    public Job expirarPedidosJob(JobRepository repository, Step expirarPedidosStep, ResumenExpiracionListener listener) {
+        return new JobBuilder("expirarPedidosJob", repository).start(expirarPedidosStep)
+                .listener(listener).build();
     }
 }
