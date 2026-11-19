@@ -28,3 +28,8 @@ services:
 
       ports:
         - "5434:5432"
+
+    zipkin:
+      image: openzipkin/zipkin
+      ports:
+        - "9411:9411"

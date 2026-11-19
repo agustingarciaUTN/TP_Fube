@@ -15,3 +15,8 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
