@@ -8,6 +8,7 @@ import com.tiendaonline.inventario.Excepciones.ReservaNoExistenteException;
 import com.tiendaonline.inventario.Excepciones.StockNoSuficienteException;
 import com.tiendaonline.inventario.Servicios.ServicioReservaImpl;
 import com.tiendaonline.inventario.modelo.Reserva;
+import io.micrometer.tracing.Tracer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -36,6 +37,9 @@ class ControladorReservasTest {
 
     @MockBean
     private ServicioReservaImpl servicioReserva;
+
+    @MockBean
+    private Tracer tracer;
 
     private ReservaDTO ejReservaDTOEntrada(){
         return ReservaDTO.builder()
