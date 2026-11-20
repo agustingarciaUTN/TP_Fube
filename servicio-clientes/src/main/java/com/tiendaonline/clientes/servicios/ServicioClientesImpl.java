@@ -85,13 +85,13 @@ public class ServicioClientesImpl implements ServicioClientes{
         //Si el cliente no existe se lanza una excepcion
         Cliente clienteEncontrado = repositorioClientes.findById(id)
                 .orElseThrow(() -> {
-                    log.warn("No se encontró el cliente con ", kv("ClienteId", id));
+                    log.warn("No se encontró el cliente con {}", kv("ClienteId", id));
                     return new ClienteNoEncontradoException("No se encontró el cliente con el id introducido");
                 });
         ClienteDTO clienteDTO = ClienteMapper.toDTO(clienteEncontrado);
         //Se consulta si el feature flag está activo y se realiza el enmascarado de nombre y email si es necesario
         if(gestorFeatureFlag.isFlagActivo("mask-pii")){
-            log.info("Enmascarando Pii de ", kv("ClienteId", id));
+            log.info("Enmascarando Pii de {}", kv("ClienteId", id));
             clienteDTO.setNombre(enmascararNombre(clienteDTO.getNombre()));
             clienteDTO.setEmail(enmascararEmail(clienteEncontrado.getEmail()));
             return clienteDTO;
