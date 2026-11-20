@@ -17,6 +17,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import static java.util.Objects.isNull;
+import static net.logstash.logback.argument.StructuredArguments.kv;
 
 @Service
 @AllArgsConstructor
@@ -41,11 +42,11 @@ public class ServicioClientesImpl implements ServicioClientes{
         //Se llama al metodo para simplificar
         verificarDatosRegistro(clienteDTO);
         if (repositorioClientes.existsByEmail(clienteDTO.getEmail())) {
-            log.warn("El email {} ya está registrado", clienteDTO.getEmail());
+            log.warn("El correo electronico ingresado ya está registrado");
             throw new EmailExistenteException("El correo electronico ya se encuentra registrado");
         }
         if (repositorioClientes.existsByNombre(clienteDTO.getNombre())) {
-            log.warn("El nombre {} ya está registrado", clienteDTO.getNombre());
+            log.warn("El nombre ingresado ya está registrado");
             throw new NombreExistenteException("El nombre ya se encuentra registrado");
         }
         //Se genera el cliente para guardarse
@@ -56,7 +57,7 @@ public class ServicioClientesImpl implements ServicioClientes{
                 .build();
         //Se guarda el cliente
         ClienteDTO clienteGuardado = ClienteMapper.toDTO(repositorioClientes.save(cliente));
-        log.info("Se guardó el cliente con nombre {} y email {}", clienteDTO.getNombre(), clienteDTO.getEmail());
+        log.info("Se guardó el cliente con {}", kv("ClienteId", clienteGuardado.getId()));
         //Se retorna el cliente guardado
         return clienteGuardado;
     }
@@ -66,25 +67,31 @@ public class ServicioClientesImpl implements ServicioClientes{
         //verifica que el nombre no este vacio y que cumpla con el patron
         if (isNull(clienteDTO.getNombre())||
                 !PATRON_NOMBRE.matcher(clienteDTO.getNombre().trim()).matches()) {
+            log.warn("El nombre introducido no es válido {}", kv("Nombre",clienteDTO.getNombre()));
             throw new NombreInvalidoException("El nombre no es valido");
         }
         //Verifica que el email no este vacio y que cumpla con el patron
         if (isNull(clienteDTO.getEmail()) ||
                 !PATRON_EMAIL.matcher(clienteDTO.getEmail()).matches()) {
+            log.warn("El email introducido no es válido {}", kv("Email",clienteDTO.getEmail()));
             throw new EmailInvalidoException("El correo electronico no es valido");
         }
-        log.info("Nombre {} y mail {} verificados exitosamente", clienteDTO.getNombre(), clienteDTO.getEmail());
+        log.info("Email y nombre verificados exitosamente");
     }
 
     @Override
     public ClienteDTO consultarClientePorId(UUID id){
-        log.info("Buscando cliente con id: {}", id);
+        log.info("Buscando {}", kv("ClienteId", id));
         //Si el cliente no existe se lanza una excepcion
         Cliente clienteEncontrado = repositorioClientes.findById(id)
-                .orElseThrow(() -> new ClienteNoEncontradoException("No se encontró el cliente con el id introducido"));
+                .orElseThrow(() -> {
+                    log.warn("No se encontró el cliente con ", kv("ClienteId", id));
+                    return new ClienteNoEncontradoException("No se encontró el cliente con el id introducido");
+                });
         ClienteDTO clienteDTO = ClienteMapper.toDTO(clienteEncontrado);
         //Se consulta si el feature flag está activo y se realiza el enmascarado de nombre y email si es necesario
         if(gestorFeatureFlag.isFlagActivo("mask-pii")){
+            log.info("Enmascarando Pii de ", kv("ClienteId", id));
             clienteDTO.setNombre(enmascararNombre(clienteDTO.getNombre()));
             clienteDTO.setEmail(enmascararEmail(clienteEncontrado.getEmail()));
             return clienteDTO;
@@ -120,9 +127,9 @@ public class ServicioClientesImpl implements ServicioClientes{
 
     @Override
     public ListaPedidosResponseDTO listarPedidosCliente(UUID idCliente){
-        log.info("Consultando pedidos para el cliente con id={}", idCliente);
+        log.info("Consultando pedidos para el cliente con {}", kv("ClienteId", idCliente));
         ListaPedidosResponseDTO respuesta = servicioPedidos.listarPedidosCliente(idCliente);
-        log.info("Pedidos recuperados con éxito para id={}. Cantidad encontrada: {}", idCliente, respuesta.total());
+        log.info("Pedidos recuperados con éxito para {}. Cantidad encontrada: {}", kv("ClienteId", idCliente), respuesta.total());
         return respuesta;
     }
 }

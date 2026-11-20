@@ -7,6 +7,7 @@ import com.tiendaonline.clientes.DTOs.ListaPedidosResponseDTO;
 import com.tiendaonline.clientes.DTOs.PedidoResponseDTO;
 import com.tiendaonline.clientes.excepciones.*;
 import com.tiendaonline.clientes.servicios.ServicioClientesImpl;
+import io.micrometer.tracing.Tracer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -37,6 +38,9 @@ class ControladorClientesTest {
 
     @MockBean 
     private ServicioClientesImpl servicioClientes;
+
+    @MockBean
+    private Tracer tracer;
 
 
     private ClienteDTO clienteDTOReq(){
