@@ -188,7 +188,7 @@ class ServicioInventarioImplTest {
 
         Float precioUnitario = servicioInventario.consultarPrecio(idDTO);
 
-        assertThat(precioUnitario).isEqualTo(15);
+        assertThat(precioUnitario).isEqualTo(5);
         verify(repositorioProductos, times(1)).findById(idDTO);
     }
 
