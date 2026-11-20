@@ -67,6 +67,7 @@ public class PedidoService {
         }
         Pedido pedido = new Pedido(request.clienteId(), itemsPedido, pedidoId);
         pedidoRepository.save(pedido);
+        log.info("Pedido creado con: id={}, cliente={}, items={}, monto={}",pedido.getId(), request.clienteId(), itemsPedido.size(), pedido.getMontoTotal());
         return PedidoResponse.desde(pedido);
     }
 
@@ -77,15 +78,18 @@ public class PedidoService {
             throw new TransicionInvalidaException("Un pedido no puede pasar a EXPIRADO desde la API, ese estado lo asigna solo un proceso automatico");
         }
 
+        EstadoPedido estadoInicial = pedido.getEstado();
         pedido.cambiarEstado(estadoFinal);
 
-        if (estadoFinal == EstadoPedido.CANCELADO){
-            for(ItemPedido item : pedido.getItems()){
+        if (estadoFinal == EstadoPedido.CANCELADO) {
+            for (ItemPedido item : pedido.getItems()) {
                 inventarioClient.liberar(item.getReservaId());
             }
         }
 
         pedidoRepository.save(pedido);
+        log.info("Pedido {}: {} -> {}",pedido.getId(), estadoInicial, pedido.getEstado());
+
         return PedidoResponse.desde(pedido);
     }
 }
