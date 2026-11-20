@@ -18,6 +18,8 @@ spring:
   batch:
     job:
       enabled: false
+    jdbc:
+      initialize-schema: never
 
 servicios:
   clientes:
@@ -27,3 +29,7 @@ servicios:
   timeout-conexion: 2s
   timeout-lectura: 3s
 
+management:
+  tracing:
+    sampling:
+      probability: 1.0
