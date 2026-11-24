@@ -1,8 +1,7 @@
 package com.tiendaonline.pedidos.controlador;
 
-import com.tiendaonline.pedidos.dominio.ItemPedido;
-import com.tiendaonline.pedidos.dominio.Pedido;
-import com.tiendaonline.pedidos.dominio.PedidoNoEncontradoException;
+import com.tiendaonline.pedidos.dominio.*;
+import com.tiendaonline.pedidos.dto.CrearPedidoRequest;
 import com.tiendaonline.pedidos.dto.ListaPedidosResponse;
 import com.tiendaonline.pedidos.dto.PedidoResponse;
 import com.tiendaonline.pedidos.servicio.PedidoService;
@@ -10,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 
@@ -17,10 +17,11 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.hamcrest.Matchers.endsWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(PedidoController.class)
 public class PedidoControllerTest {
@@ -35,6 +36,11 @@ public class PedidoControllerTest {
         ItemPedido itemPedido2 = new ItemPedido(3, new BigDecimal("10.50"), UUID.randomUUID(), UUID.randomUUID());
 
         return new Pedido(clienteId, List.of(itemPedido, itemPedido2));
+    }
+
+    private String jsonPedido(UUID clienteId, UUID productoId) {
+        return "{\"clienteId\":\"" + clienteId + "\","
+                + "\"items\":[{\"productoId\":\"" + productoId + "\",\"cantidad\":2}]}";
     }
 
     @Test
@@ -73,7 +79,7 @@ public class PedidoControllerTest {
         Pedido pedido2 = pedidoValido(clienteId);
         when(pedidoService.listarPorCliente(clienteId)).thenReturn(ListaPedidosResponse.desde(List.of(pedido, pedido2)));
 
-        mockMvc.perform(get("/v1/pedidos").param("clienteId",  clienteId.toString()))
+        mockMvc.perform(get("/v1/pedidos").param("clienteId", clienteId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.total").value(2))
                 .andExpect(jsonPath("$.items.length()").value(2))
@@ -83,5 +89,84 @@ public class PedidoControllerTest {
     @Test
     void listarSinClienteIdDevuelve400() throws Exception {
         mockMvc.perform(get("/v1/pedidos")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void crearPedidoDevuelve201ConLocation() throws Exception {
+        UUID clienteId = UUID.randomUUID();
+        Pedido pedido = pedidoValido(clienteId);
+
+        when(pedidoService.crear(any(CrearPedidoRequest.class)))
+                .thenReturn(PedidoResponse.desde(pedido));
+
+        mockMvc.perform(post("/v1/pedidos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonPedido(clienteId, UUID.randomUUID())))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", endsWith("/v1/pedidos/" + pedido.getId())));
+    }
+
+    @Test
+    void crearPedidoSinItemsDevuelve400() throws Exception {
+        UUID clienteId = UUID.randomUUID();
+
+        mockMvc.perform(post("/v1/pedidos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"clienteId\":\"" + clienteId + "\","
+                                + "\"items\":[]}"))
+                .andExpect(status().isBadRequest());
+
+        verify(pedidoService, never()).crear(any(CrearPedidoRequest.class));
+    }
+
+    @Test
+    void crearPedidoSinStockDevuelve409() throws Exception {
+        when(pedidoService.crear(any(CrearPedidoRequest.class)))
+                .thenThrow(new StockInsuficienteException("Stock insuficiente"));
+
+        mockMvc.perform(post("/v1/pedidos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonPedido(UUID.randomUUID(), UUID.randomUUID())))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.title").value("Stock insuficiente"));
+    }
+
+    @Test
+    void cambiarEstadoDevuelve200() throws Exception {
+        Pedido pedido = pedidoValido(UUID.randomUUID());
+
+        when(pedidoService.cambiarEstado(eq(pedido.getId()), eq(EstadoPedido.CANCELADO)))
+                .thenReturn(PedidoResponse.desde(pedido));
+
+        mockMvc.perform(patch("/v1/pedidos/{id}", pedido.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"estado\":\"CANCELADO\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(pedido.getId().toString()));
+    }
+
+    @Test
+    void cambiarEstadoConTransicionInvalidaDevuelve409() throws Exception {
+
+        when(pedidoService.cambiarEstado(any(UUID.class), any(EstadoPedido.class)))
+                .thenThrow(new TransicionInvalidaException("Transicion invalida"));
+
+        mockMvc.perform(patch("/v1/pedidos/{id}", UUID.randomUUID())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"estado\":\"EXPIRADO\"}"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.title").value("Transicion de estado invalida"));
+    }
+
+    @Test
+    void cambiarEstadoConEstadoInexistenteDevuelve400() throws Exception {
+        Pedido pedido = pedidoValido(UUID.randomUUID());
+
+        mockMvc.perform(patch("/v1/pedidos/{id}", pedido.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"estado\":\"ENVIADO\"}"))
+                .andExpect(status().isBadRequest());
+
+        verify(pedidoService, never()).cambiarEstado(any(UUID.class), any(EstadoPedido.class));
     }
 }

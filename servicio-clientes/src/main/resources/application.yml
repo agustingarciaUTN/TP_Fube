@@ -6,8 +6,8 @@ spring:
     name: servicio-clientes
   datasource:
     url: jdbc:postgresql://localhost:5432/clientes_db
-    username: postgres
-    password: postgres
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
   jpa:
     open-in-view: false
     hibernate:
@@ -22,3 +22,12 @@ statsig:
 servicios:
   pedidos:
     url: http://localhost:8083
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus

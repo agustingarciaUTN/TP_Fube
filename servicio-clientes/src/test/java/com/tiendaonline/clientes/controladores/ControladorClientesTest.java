@@ -1,14 +1,13 @@
 package com.tiendaonline.clientes.controladores;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.statsig.Statsig;
 import com.tiendaonline.clientes.DTOs.ClienteDTO;
 import com.tiendaonline.clientes.DTOs.ItemPedidoResponseDTO;
 import com.tiendaonline.clientes.DTOs.ListaPedidosResponseDTO;
 import com.tiendaonline.clientes.DTOs.PedidoResponseDTO;
 import com.tiendaonline.clientes.excepciones.*;
 import com.tiendaonline.clientes.servicios.ServicioClientesImpl;
-import com.tiendaonline.clientes.statsig.GestorFeatureFlag;
+import io.micrometer.tracing.Tracer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -41,10 +40,8 @@ class ControladorClientesTest {
     private ServicioClientesImpl servicioClientes;
 
     @MockBean
-    private GestorFeatureFlag gestorFeatureFlag;
+    private Tracer tracer;
 
-    @MockBean
-    private Statsig statsig;
 
     private ClienteDTO clienteDTOReq(){
         return ClienteDTO.builder()

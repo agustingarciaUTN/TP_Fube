@@ -7,12 +7,16 @@ import com.tiendaonline.inventario.mappers.ProductoMapper;
 import com.tiendaonline.inventario.modelo.Producto;
 import com.tiendaonline.inventario.repositorios.RepositorioProductos;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ServicioInventarioImpl implements ServicioInventario{
     private final RepositorioProductos repositorioProductos;
 
@@ -23,9 +27,11 @@ public class ServicioInventarioImpl implements ServicioInventario{
         //Si no encuentra ningún producto con ese id -> orElseThrow() excepcion de producto no encontrado
         ProductoDTO producto = repositorioProductos.findById(id)
                 .map(ProductoMapper::toDTO)
-                .orElseThrow( () -> new ProductoNoEncontradoException(
-                        "El id introducido no corresponde a ningún producto")
-        );
+                .orElseThrow( () -> {
+                    log.warn("El id {} no corresponde a ningún producto", kv("Producto", id));
+                    return new ProductoNoEncontradoException(
+                        "El id introducido no corresponde a ningún producto");
+                });
         //Retorna en stock disponible del producto
         return producto.getCantidadDisponible();
     }
@@ -36,9 +42,11 @@ public class ServicioInventarioImpl implements ServicioInventario{
         //Busca en el repositorio por id
         //Si no encuentra ningún producto con ese id -> orElseThrow() excepcion de producto no encontrado
         Producto producto = repositorioProductos.findById(id)
-                .orElseThrow( () -> new ProductoNoEncontradoException(
-                        "El id introducido no corresponde a ningún producto")
-        );
+                .orElseThrow( () -> {
+                    log.warn("El id {} no corresponde a ningún producto", kv("Producto", id));
+                    return new ProductoNoEncontradoException(
+                            "El id introducido no corresponde a ningún producto");
+                });
         //Se crea la variable stockActual con el valor de la cantidad de producto disponible
         int stockActual = producto.getCantidadDisponible();
         //Si hay suficiente stock para reducir cantidad sin que se haga negativo
@@ -48,6 +56,8 @@ public class ServicioInventarioImpl implements ServicioInventario{
             //Se guarda el producto con el nuevo stock reducido y se retorna
             return ProductoMapper.toDTO(repositorioProductos.save(producto));
         }else{
+            log.warn("El producto con id {} no tiene stock suficiente para la reserva. Actual = {}, Requerido = {}",
+                    kv("Producto", id), producto.getCantidadDisponible(), cantidad);
             //Si no hay suficiente stock se lanza excepcion
             throw new StockNoSuficienteException("No hay stock suficiente de "
                     + producto.getNombre() + " stock actual = " + stockActual
@@ -61,9 +71,11 @@ public class ServicioInventarioImpl implements ServicioInventario{
         //Busca en el repositorio por id
         //Si no encuentra ningún producto con ese id -> orElseThrow() excepcion de producto no encontrado
         Producto producto = repositorioProductos.findById(id)
-                .orElseThrow( () -> new ProductoNoEncontradoException(
-                        "El id introducido no corresponde a ningún producto")
-        );
+                .orElseThrow( () -> {
+                    log.warn("El id {} no corresponde a ningún producto", kv("Producto", id));
+                    return new ProductoNoEncontradoException(
+                            "El id introducido no corresponde a ningún producto");
+                });
         //Se crea la variable stockActual con el valor de la cantidad de producto disponible
         int stockActual = producto.getCantidadDisponible();
         //Se setea el nuevo valor de stock, aumentando el mismo en cantidad
@@ -78,9 +90,12 @@ public class ServicioInventarioImpl implements ServicioInventario{
         //Si no encuentra ningún producto con ese id -> orElseThrow() excepcion de producto no encontrado
         ProductoDTO producto = repositorioProductos.findById(id)
                 .map(ProductoMapper::toDTO)
-                .orElseThrow( () -> new ProductoNoEncontradoException(
-                                "El id introducido no corresponde a ningún producto"));
+                .orElseThrow( () -> {
+                    log.warn("El id {} no corresponde a ningún producto", kv("Producto", id));
+                    return new ProductoNoEncontradoException(
+                            "El id introducido no corresponde a ningún producto");
+                });
         //Retorna en precio unitario del producto
-        return producto.getCantidadDisponible();
+        return producto.getPrecioUnitario();
     }
 }

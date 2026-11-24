@@ -3,6 +3,7 @@ package com.tiendaonline.inventario.controlador;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tiendaonline.inventario.Excepciones.ProductoNoEncontradoException;
 import com.tiendaonline.inventario.Servicios.ServicioInventarioImpl;
+import io.micrometer.tracing.Tracer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -27,6 +28,9 @@ class ControladorProductosTest {
 
     @MockBean
     private ServicioInventarioImpl servicioInventario;
+
+    @MockBean
+    private Tracer tracer;
 
     @Test
     void consultarStock_Controlador_Correcto() throws Exception {
