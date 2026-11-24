@@ -15,7 +15,7 @@ public record ListaPedidosResponseDTO(
         @Schema(
                 description = "Lista de pedidos asociados al cliente"
         )
-        List<PedidoResponseDTO> pedidos,
+        List<PedidoResponseDTO> items,
         @Schema(
                 description = "Cantidad total de pedidos registrados para el cliente",
                 example = "3",
@@ -24,6 +24,6 @@ public record ListaPedidosResponseDTO(
         long total
 ) {
     public List<PedidoResponseDTO> getPedidos(){
-        return pedidos;
+        return items;
     }
 }
